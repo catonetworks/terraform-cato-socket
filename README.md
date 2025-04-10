@@ -5,6 +5,24 @@ Terraform module which creates a Socket Site in the Cato Management Application 
 ## Usage
 
 ```hcl
+data "cato_siteLocation" "ny" {
+  filters = [{
+    field = "city"
+    search = "New York City"
+    operation = "exact"
+  },
+  {
+    field = "state_name"
+    search = "New York"
+    operation = "exact"
+  },
+ {
+    field = "country_name"
+    search = "United"
+    operation = "contains"
+  }]
+}
+
 module "socket-site" {
   providers = {
     cato = cato
@@ -17,10 +35,10 @@ module "socket-site" {
   site_type            = "BRANCH"
   connection_type      = "SOCKET_X1600"
   site_location = {
-    city         = "San Diego"
-    country_code = "US"
-    state_code   = "US-CA"
-    timezone     = "America/Los_Angeles"
+    city = data.cato_siteLocation.ny.locations[0].city
+    country_code = data.cato_siteLocation.ny.locations[0].country_code
+    state_code = data.cato_siteLocation.ny.locations[0].state_code
+    timezone = data.cato_siteLocation.ny.locations[0].timezone
   }
   cato_interfaces = [
     {
