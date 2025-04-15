@@ -4,8 +4,8 @@ variable "site_id" {
   default     = null
 }
 
-variable "network_interface_name" {
-  description = "Name of the network interface to assign the network range to."
+variable "interface_id" {
+  description = "ID of the network interface to assign the network range to."
   type        = string
   default     = null
 }

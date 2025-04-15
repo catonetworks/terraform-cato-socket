@@ -7,7 +7,7 @@ resource "cato_lan_interface" "interface" {
   subnet            = var.subnet
   translated_subnet = var.translated_subnet
   vrrp_type         = var.vrrp_type
-}
+}  
 
 module "network_range" {
   depends_on = [cato_lan_interface.interface]
@@ -17,7 +17,7 @@ module "network_range" {
   source                 = "../network_range"
   for_each               = { for network_range in var.network_ranges : network_range.subnet => network_range }
   site_id                = var.site_id
-  network_interface_name = var.interface_id
+  interface_id           = cato_lan_interface.interface.id
   name                   = each.value.name
   range_type             = each.value.range_type
   subnet                 = each.value.subnet

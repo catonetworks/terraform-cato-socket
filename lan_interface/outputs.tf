@@ -1,3 +1,8 @@
+output "network_interface_id" {
+  description = "ID of the network interface"
+  value       = cato_lan_interface.interface.id
+}
+
 output "lan_interface_name" {
   description = "Name of the LAN interface"
   value       = cato_lan_interface.interface.name

@@ -57,13 +57,13 @@ variable "vrrp_type" {
 variable "network_ranges" {
   description = "List of network ranges for the interface."
   type = list(object({
-    name             = string
-    range_type       = string
-    subnet           = string
-    local_ip         = string
+    name              = string
+    range_type        = string
+    subnet            = string
+    local_ip          = string
     translated_subnet = string
-    gateway          = string
-    vlan             = number
+    gateway           = string
+    vlan              = number
     dhcp_settings = object({
       dhcp_type = string
       ip_range  = string
