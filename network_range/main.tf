@@ -6,7 +6,7 @@
 # }
 
 resource "cato_network_range" "with_dhcp" {
-  count        = var.dhcp_settings == null ? 0 : 1
+  count        = var.dhcp_settings == null ? 1 : 0
   site_id      = var.site_id
   interface_id = var.interface_id
   name         = var.name
@@ -22,7 +22,7 @@ resource "cato_network_range" "with_dhcp" {
 }
 
 resource "cato_network_range" "no_dhcp" {
-  count        = var.dhcp_settings == null ? 1 : 0
+  count        = var.dhcp_settings == null ? 0 : 1
   site_id      = var.site_id
   interface_id = var.interface_id
   name         = var.name
