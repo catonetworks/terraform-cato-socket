@@ -51,13 +51,6 @@ data "cato_siteLocation" "ny" {
   }]
 }
 
-output "timezone" { 
-    value = data.cato_siteLocation.ny.locations[0].timezone[0]
-}
-output "state_code" { 
-    value = data.cato_siteLocation.ny.locations[0].state_code
-}
-
 module "socket-site" {
   source               = "../terraform-cato-socket"
   site_name            = "Cato-X1600"
