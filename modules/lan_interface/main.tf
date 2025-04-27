@@ -11,9 +11,6 @@ resource "cato_lan_interface" "interface" {
 
 module "network_range" {
   depends_on = [cato_lan_interface.interface]
-  providers = {
-    cato = cato
-  }
   source                 = "../network_range"
   for_each               = { for network_range in var.network_ranges : network_range.subnet => network_range }
   site_id                = var.site_id
