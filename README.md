@@ -112,7 +112,10 @@ module "socket-site" {
           gateway           = null
           vlan              = 11
           translated_subnet = null
-          dhcp_settings     = null
+          dhcp_settings     = {
+            dhcp_type = "DHCP_RANGE"
+            ip_range = "192.168.188.10 - 192.168.188.100"
+          }
         },
         {
           name              = "VLAN_TF3"
