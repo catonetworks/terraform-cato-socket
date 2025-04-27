@@ -6,7 +6,8 @@
 # }
 
 resource "cato_network_range" "with_dhcp" {
-  count        = var.dhcp_settings == null ? 1 : 0
+  ## If dhcp_settings is null then don't build (count = 0, else count=1)
+  count        = var.dhcp_settings == null ? 0 : 1
   site_id      = var.site_id
   interface_id = var.interface_id
   name         = var.name
@@ -22,7 +23,8 @@ resource "cato_network_range" "with_dhcp" {
 }
 
 resource "cato_network_range" "no_dhcp" {
-  count        = var.dhcp_settings == null ? 0 : 1
+  ## If dhcp_settings is null then build (count = 1, else count=0)
+  count        = var.dhcp_settings == null ? 1 : 0
   site_id      = var.site_id
   interface_id = var.interface_id
   name         = var.name

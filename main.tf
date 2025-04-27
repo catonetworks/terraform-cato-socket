@@ -29,10 +29,7 @@ resource "cato_wan_interface" "wan" {
 }
 
 module "lan_interfaces" {
-  providers = {
-    cato = cato
-  }
-  source            = "./lan_interface"
+  source            = "./modules/lan_interface"
   for_each          = { for interface in var.lan_interfaces : interface.interface_id => interface }
   site_id           = cato_socket_site.site.id
   local_ip          = each.value.local_ip
