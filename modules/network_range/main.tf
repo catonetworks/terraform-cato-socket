@@ -1,10 +1,4 @@
 
-
-# data "cato_networkInterfaces" "interface" {
-#   site_id                = var.site_id
-#   network_interface_name = var.network_interface_name
-# }
-
 resource "cato_network_range" "with_dhcp" {
   ## If dhcp_settings is null then don't build (count = 0, else count=1)
   count        = var.dhcp_settings == null ? 0 : 1
