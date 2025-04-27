@@ -171,7 +171,9 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
 
 ## Providers
 
@@ -183,15 +185,15 @@ No requirements.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_lan_interfaces"></a> [lan\_interfaces](#module\_lan\_interfaces) | ./lan_interface | n/a |
+| <a name="module_lan_interfaces"></a> [lan\_interfaces](#module\_lan\_interfaces) | ./modules/lan_interface | n/a |
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [cato_socket_site.site](https://registry.terraform.io/providers/hashicorp/cato/latest/docs/resources/socket_site) | resource |
-| [cato_wan_interface.wan](https://registry.terraform.io/providers/hashicorp/cato/latest/docs/resources/wan_interface) | resource |
-| [cato_accountSnapshotSite.site](https://registry.terraform.io/providers/hashicorp/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
+| [cato_socket_site.site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/socket_site) | resource |
+| [cato_wan_interface.wan](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/wan_interface) | resource |
+| [cato_accountSnapshotSite.site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
 
 ## Inputs
 
@@ -199,7 +201,7 @@ No requirements.
 |------|-------------|------|---------|:--------:|
 | <a name="input_cato_interfaces"></a> [cato\_interfaces](#input\_cato\_interfaces) | n/a | <pre>list(object({<br/>    interface_id         = string<br/>    name                 = string<br/>    upstream_bandwidth   = number<br/>    downstream_bandwidth = number<br/>    role                 = string<br/>    precedence           = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_connection_type"></a> [connection\_type](#input\_connection\_type) | Connection type can be SOCKET\_AWS1500, SOCKET\_AZ1500, SOCKET\_ESX1500, SOCKET\_X1500, SOCKET\_X1600, SOCKET\_X1600\_LTE, SOCKET\_X1700 | `string` | `null` | no |
-| <a name="input_lan_interfaces"></a> [lan\_interfaces](#input\_lan\_interfaces) | n/a | <pre>list(object({<br/>    interface_id      = string<br/>    name              = string<br/>    dest_type         = string<br/>    local_ip          = string<br/>    subnet            = string<br/>    translated_subnet = string<br/>    network_ranges = list(object({<br/>      name       = string<br/>      range_type = string<br/>      subnet     = string<br/>      local_ip   = string<br/>      gateway    = string<br/>      vlan       = number<br/>      translated_subnet = string<br/>      dhcp_settings = object({<br/>        dhcp_type = string<br/>        ip_range  = string<br/>      })<br/>    }))<br/>  }))</pre> | `[]` | no |
+| <a name="input_lan_interfaces"></a> [lan\_interfaces](#input\_lan\_interfaces) | n/a | <pre>list(object({<br/>    interface_id      = string<br/>    name              = string<br/>    dest_type         = string<br/>    local_ip          = string<br/>    subnet            = string<br/>    translated_subnet = string<br/>    network_ranges = list(object({<br/>      name              = string<br/>      range_type        = string<br/>      subnet            = string<br/>      local_ip          = string<br/>      gateway           = string<br/>      vlan              = number<br/>      translated_subnet = string<br/>      dhcp_settings = object({<br/>        dhcp_type = string<br/>        ip_range  = string<br/>      })<br/>    }))<br/>  }))</pre> | `[]` | no |
 | <a name="input_local_ip"></a> [local\_ip](#input\_local\_ip) | Native network range | `string` | `null` | no |
 | <a name="input_native_network_range"></a> [native\_network\_range](#input\_native\_network\_range) | Native network range | `string` | `null` | no |
 | <a name="input_site_description"></a> [site\_description](#input\_site\_description) | n/a | `string` | `null` | no |
