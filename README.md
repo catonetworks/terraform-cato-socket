@@ -2,53 +2,17 @@
 
 Terraform module which creates a Socket Site in the Cato Management Application (CMA), and supports bulk configuring socket interfaces and network ranges. 
 
+## NOTE
+- For help with finding exact sytax to match site location for city, state_name, country_name and timezone, please refer to the [cato_siteLocation data source](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/siteLocation).
+- For help with finding a license id to assign, please refer to the [cato_licensingInfo data source](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/licensingInfo).
+
 ## Usage
 
 ```hcl
-terraform {
-  required_providers {
-    cato = {
-      source = "catonetworks/cato"
-    }
-  }
-  required_version = ">= 1.3.0"
-}
-
-
 provider "cato" {
   baseurl    = var.baseurl
   token      = var.token
   account_id = var.cato_account_id
-}
-
-variable "baseurl" {
-  default = ""
-}
-
-variable "token" {
-  default = ""
-}
-
-variable "cato_account_id" {
-  default = ""
-}
-
-data "cato_siteLocation" "ny" {
-  filters = [{
-    field     = "city"
-    search    = "New York City"
-    operation = "exact"
-    },
-    {
-      field     = "state_name"
-      search    = "New York"
-      operation = "exact"
-    },
-    {
-      field     = "country_name"
-      search    = "United"
-      operation = "contains"
-  }]
 }
 
 module "socket-site" {
@@ -60,10 +24,10 @@ module "socket-site" {
   site_type            = "BRANCH"
   connection_type      = "SOCKET_X1600"
   site_location = {
-    city         = data.cato_siteLocation.ny.locations[0].city
-    country_code = data.cato_siteLocation.ny.locations[0].country_code
-    state_code   = data.cato_siteLocation.ny.locations[0].state_code
-    timezone     = data.cato_siteLocation.ny.locations[0].timezone[0]
+    city         = "New York City"
+    country_code = "US"
+    state_code   = "US-NY" ## Optional - for countries with states"
+    timezone     = "America/New_York"
   }
   cato_interfaces = [
     {
@@ -218,6 +182,7 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 
 | Name | Type |
 |------|------|
+| [cato_license.license](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/license) | resource |
 | [cato_socket_site.site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/socket_site) | resource |
 | [cato_wan_interface.wan](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/wan_interface) | resource |
 | [cato_accountSnapshotSite.site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
@@ -229,6 +194,8 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 | <a name="input_cato_interfaces"></a> [cato\_interfaces](#input\_cato\_interfaces) | n/a | <pre>list(object({<br/>    interface_id         = string<br/>    name                 = string<br/>    upstream_bandwidth   = number<br/>    downstream_bandwidth = number<br/>    role                 = string<br/>    precedence           = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_connection_type"></a> [connection\_type](#input\_connection\_type) | Connection type can be SOCKET\_AWS1500, SOCKET\_AZ1500, SOCKET\_ESX1500, SOCKET\_X1500, SOCKET\_X1600, SOCKET\_X1600\_LTE, SOCKET\_X1700 | `string` | `null` | no |
 | <a name="input_lan_interfaces"></a> [lan\_interfaces](#input\_lan\_interfaces) | n/a | <pre>list(object({<br/>    interface_id      = string<br/>    name              = string<br/>    dest_type         = string<br/>    local_ip          = string<br/>    subnet            = string<br/>    translated_subnet = string<br/>    network_ranges = list(object({<br/>      name              = string<br/>      range_type        = string<br/>      subnet            = string<br/>      local_ip          = string<br/>      gateway           = string<br/>      vlan              = number<br/>      translated_subnet = string<br/>      dhcp_settings = object({<br/>        dhcp_type = string<br/>        ip_range  = string<br/>      })<br/>    }))<br/>  }))</pre> | `[]` | no |
+| <a name="input_license_bw"></a> [license\_bw](#input\_license\_bw) | The license bandwidth number for the cato site, specifying bandwidth ONLY applies for pooled licenses.  For a standard site license that is not pooled, leave this value null. Must be a number greater than 0 and an increment of 10. | `string` | `null` | no |
+| <a name="input_license_id"></a> [license\_id](#input\_license\_id) | The license ID for the Cato vSocket of license type CATO\_SITE, CATO\_SSE\_SITE, CATO\_PB, CATO\_PB\_SSE.  Example License ID value: 'abcde123-abcd-1234-abcd-abcde1234567'.  Note that licenses are for commercial accounts, and not supported for trial accounts. | `string` | `null` | no |
 | <a name="input_local_ip"></a> [local\_ip](#input\_local\_ip) | Native network range | `string` | `null` | no |
 | <a name="input_native_network_range"></a> [native\_network\_range](#input\_native\_network\_range) | Native network range | `string` | `null` | no |
 | <a name="input_site_description"></a> [site\_description](#input\_site\_description) | n/a | `string` | `null` | no |
@@ -240,7 +207,11 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 
 | Name | Description |
 |------|-------------|
+| <a name="output_cato_license_site"></a> [cato\_license\_site](#output\_cato\_license\_site) | n/a |
+| <a name="output_lan_interfaces"></a> [lan\_interfaces](#output\_lan\_interfaces) | n/a |
+| <a name="output_site"></a> [site](#output\_site) | n/a |
 | <a name="output_site_id"></a> [site\_id](#output\_site\_id) | ID of the created socket site |
 | <a name="output_site_location"></a> [site\_location](#output\_site\_location) | Location of the socket site |
 | <a name="output_site_name"></a> [site\_name](#output\_site\_name) | Name of the socket site |
+| <a name="output_wan_interfaces"></a> [wan\_interfaces](#output\_wan\_interfaces) | n/a |
 <!-- END_TF_DOCS -->

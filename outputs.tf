@@ -26,5 +26,14 @@ output "lan_interfaces" {
   value = { for k, v in module.lan_interfaces : k => {
     interface      = v.lan_interface
     network_ranges = v.network_ranges
-  }}
+  } }
+}
+
+output "cato_license_site" {
+  value = var.license_id == null ? null : {
+    id           = cato_license.license[0].id
+    license_id   = cato_license.license[0].license_id
+    license_info = cato_license.license[0].license_info
+    site_id      = cato_license.license[0].site_id
+  }
 }

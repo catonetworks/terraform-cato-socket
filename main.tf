@@ -40,3 +40,11 @@ module "lan_interfaces" {
   network_ranges    = each.value.network_ranges
   dest_type         = each.value.dest_type
 }
+
+resource "cato_license" "license" {
+  depends_on = [cato_socket_site.site]
+  count      = var.license_id == null ? 0 : 1
+  site_id    = cato_socket_site.site.id
+  license_id = var.license_id
+  bw         = var.license_bw == null ? null : var.license_bw
+}
