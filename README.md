@@ -30,10 +30,11 @@ module "socket-site" {
   site_type            = "BRANCH"
   connection_type      = "SOCKET_X1600"
   site_location = {
-    city         = "New York City"
-    country_code = "US"
-    state_code   = "US-NY" ## Optional - for countries with states"
-    timezone     = "America/New_York"
+    address        = "555 That Way"
+    city           = "New York City"
+    country_code   = "US"
+    state_code     = "US-NY"
+    timezone       = "America/New_York"
   }
   cato_interfaces = [
     {
@@ -214,10 +215,11 @@ module "socket-site" {
   license_bw           = 30
   
   site_location = {
-    city = "New York City"
-    country_code = "US"
-    state_code = "US-NY"
-    timezone = "America/New_York"
+    address        = "555 That Way"
+    city           = "New York City"
+    country_code   = "US"
+    state_code     = "US-NY"
+    timezone       = "America/New_York"
   }
   cato_interfaces = [
     {
@@ -293,13 +295,12 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
-| <a name="requirement_cato"></a> [cato](#requirement\_cato) | 0.0.24 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cato"></a> [cato](#provider\_cato) | 0.0.24 |
+| <a name="provider_cato"></a> [cato](#provider\_cato) | n/a |
 
 ## Modules
 
@@ -311,10 +312,10 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 
 | Name | Type |
 |------|------|
-| [cato_license.license](https://registry.terraform.io/providers/terraform-providers/cato/0.0.24/docs/resources/license) | resource |
-| [cato_socket_site.site](https://registry.terraform.io/providers/terraform-providers/cato/0.0.24/docs/resources/socket_site) | resource |
-| [cato_wan_interface.wan](https://registry.terraform.io/providers/terraform-providers/cato/0.0.24/docs/resources/wan_interface) | resource |
-| [cato_accountSnapshotSite.site](https://registry.terraform.io/providers/terraform-providers/cato/0.0.24/docs/data-sources/accountSnapshotSite) | data source |
+| [cato_license.license](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/license) | resource |
+| [cato_socket_site.site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/socket_site) | resource |
+| [cato_wan_interface.wan](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/wan_interface) | resource |
+| [cato_accountSnapshotSite.site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
 
 ## Inputs
 
@@ -328,7 +329,7 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 | <a name="input_local_ip"></a> [local\_ip](#input\_local\_ip) | Native network range | `string` | `null` | no |
 | <a name="input_native_network_range"></a> [native\_network\_range](#input\_native\_network\_range) | Native network range | `string` | `null` | no |
 | <a name="input_site_description"></a> [site\_description](#input\_site\_description) | n/a | `string` | `null` | no |
-| <a name="input_site_location"></a> [site\_location](#input\_site\_location) | n/a | <pre>object({<br/>    city         = string<br/>    country_code = string<br/>    state_code   = string<br/>    timezone     = string<br/>  })</pre> | n/a | yes |
+| <a name="input_site_location"></a> [site\_location](#input\_site\_location) | n/a | <pre>object({<br/>    address      = string<br/>    city         = string<br/>    country_code = string<br/>    state_code   = string<br/>    timezone     = string<br/>  })</pre> | n/a | yes |
 | <a name="input_site_name"></a> [site\_name](#input\_site\_name) | n/a | `string` | `null` | no |
 | <a name="input_site_type"></a> [site\_type](#input\_site\_type) | Site type can be BRANCH, CLOUD\_DC, DATACENTER, HEADQUARTERS | `string` | `"BRANCH"` | no |
 
