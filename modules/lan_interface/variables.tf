@@ -7,23 +7,18 @@ variable "site_id" {
 variable "interface_id" {
   description = "The ID of the interface."
   type        = string
-  default     = "INT_4"
 }
 
 variable "name" {
   description = "The name of the interface."
   type        = string
-  default     = "Interface wan 4"
+  default     = null
 }
 
 variable "dest_type" {
   description = "SocketInterface destination type (https://api.catonetworks.com/documentation/#definition-SocketInterfaceDestType)"
   type        = string
   default     = null
-  # validation {
-  #   condition     = contains(["INTERFACE_DISABLED", "LAN", "LAN_AND_HA", "LAN_LAG_MASTER", "LAN_LAG_MASTER_AND_VRRP", "LAN_LAG_MEMBER", "VRRP", "VRRP_AND_LAN"], var.dest_type)
-  #   error_message = "dest_type must be one of INTERFACE_DISABLED, LAN, LAN_AND_HA, LAN_LAG_MASTER, LAN_LAG_MASTER_AND_VRRP, LAN_LAG_MEMBER, VRRP, VRRP_AND_LAN."
-  # }
 }
 
 variable "local_ip" {
@@ -48,10 +43,6 @@ variable "vrrp_type" {
   description = "VRRP Type (https://api.catonetworks.com/documentation/#definition-VrrpType)"
   type        = string
   default     = null
-  # validation {
-  #   condition     = var.vrrp_type == null || contains(["DIRECT_LINK", "VIA_SWITCH"], var.vrrp_type)
-  #   error_message = "vrrp_type must be null or one of DIRECT_LINK, VIA_SWITCH."
-  # }
 }
 
 variable "network_ranges" {

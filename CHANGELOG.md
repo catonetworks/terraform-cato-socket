@@ -9,3 +9,8 @@
 
 ### Features
 - Added optional license resource and inputs used for commercial site deployments
+
+## 0.0.3 (2025-05-19)
+
+### Features
+- Update module to support modifying networks for default LAN native range interfaces

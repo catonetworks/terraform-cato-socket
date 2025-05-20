@@ -6,7 +6,13 @@ Terraform module which creates a Socket Site in the Cato Management Application 
 - For help with finding exact sytax to match site location for city, state_name, country_name and timezone, please refer to the [cato_siteLocation data source](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/siteLocation).
 - For help with finding a license id to assign, please refer to the [cato_licensingInfo data source](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/licensingInfo).
 
+
 ## Usage
+
+<details>
+<summary>Module example managing lan interfaces in native Terraform</summary>
+
+The following example shows how to create a physical socket site, and configure WAN or Cato destined interfaces, as well as one or multiple LAN interfaces passing in an array of network_ranges per LAN interface.
 
 ```hcl
 provider "cato" {
@@ -16,8 +22,8 @@ provider "cato" {
 }
 
 module "socket-site" {
-  source               = "../terraform-cato-socket"
-  site_name            = "Cato-X1600"
+  source               = "catonetworks/socket/cato"
+  site_name            = "Cato-X1600-Site"
   site_description     = "Cato-X1600"
   native_network_range = "10.11.3.0/24"
   local_ip             = "10.11.3.5"
@@ -115,13 +121,13 @@ output "Socket_WAN_Interface_Information" {
 }
 
 output "Socket_Network_Range_Information" {
-  value = flatten([
+  value = length(module.socket-site.lan_interfaces) > 0 ? flatten([
     for iface_key, iface_value in module.socket-site.lan_interfaces : [
       for subnet, net_info in iface_value.network_ranges : [
         for net_type in ["with_dhcp", "no_dhcp"] : [
           for range in net_info[net_type] : {
-            interface_id     = iface_value.interface.interface_id
-            interface_name   = iface_value.interface.name
+            interface_id     = length(iface_value.interface) > 0 ? iface_value.interface[0].interface_id : iface_key
+            interface_name   = length(iface_value.interface) > 0 ? iface_value.interface[0].name : iface_key
             subnet           = range.subnet
             local_ip         = range.local_ip
             gateway          = range.gateway
@@ -134,9 +140,131 @@ output "Socket_Network_Range_Information" {
         ]
       ]
     ]
-  ])
+  ]) : []
 }
 ```
+</details>
+
+
+<details>
+<summary>Module example managing lan interfaces from CSV</summary>
+
+The following example shows how to create a physical socket site, and configure WAN or Cato destined interfaces, as well as one or multiple LAN interfaces passing in an array of network_ranges per LAN interface.
+
+Create a csv with the following columns. 
+
+** NOTE ** Eacnh column must contain a Default range_type to configure the native range for that interface.  To add network_ranges to the primary socket LAN interface, specify LAN as the interface ID, do not add a row with Default for LAN as this is managed at the socket_site resource level.
+
+```csv
+interface_id,name,range_type,subnet,local_ip,gateway,vlan,translated_subnet,dhcp_type,ip_range
+LAN,VLAN_TF,VLAN,192.168.168.0/25,192.168.168.6,,,,,
+INT_6,Lan Interface 6,Default,192.168.198.0/25,192.168.198.6,,,,,
+INT_6,VLAN_TF,VLAN,192.168.199.0/25,192.168.199.6,,,,,
+INT_7,Lan Interface 7,Default,192.168.187.0/25,192.168.187.6,,,,DHCP_RANGE,192.168.188.10 - 192.168.188.100
+INT_7,VLAN_TF2,VLAN,192.168.188.0/25,192.168.188.6,,,,DHCP_RANGE,192.168.188.10 - 192.168.188.100
+INT_7,VLAN_TF3,VLAN,192.168.189.0/25,192.168.189.6,,,,,
+INT_7,RoutedFW Name,Routed,172.22.123.0/25,,192.168.187.7,,,,
+```
+
+```hcl
+locals {
+  network_ranges_csv = csvdecode(file("network_ranges.csv"))
+  lan_interfaces = [
+    for int_id in distinct([for row in local.network_ranges_csv : row.interface_id]) : {
+      interface_id = int_id
+      dest_type    = "LAN"
+      name = try([for row in local.network_ranges_csv : row.name if row.interface_id == int_id && row.range_type == "Default"][0], int_id == "LAN" ? null : "")
+      subnet = try([for row in local.network_ranges_csv : row.subnet if row.interface_id == int_id && row.range_type == "Default"][0], int_id == "LAN" ? null : "")
+      local_ip = try([for row in local.network_ranges_csv : row.local_ip if row.interface_id == int_id && row.range_type == "Default"][0], int_id == "LAN" ? null : "")
+      translated_subnet = null
+      network_ranges = [
+        for idx, row in [
+          for r in local.network_ranges_csv : r
+          if r.interface_id == int_id && r.range_type != "Default"
+        ] : {
+          name              = row.name
+          range_type        = row.range_type
+          subnet            = row.subnet
+          local_ip          = row.local_ip != "" ? row.local_ip : null
+          gateway           = row.gateway != "" ? row.gateway : null
+          vlan              = row.range_type == "VLAN" ? 10 + idx + (int_id == "INT_6" ? 0 : 1) : null
+          translated_subnet = row.translated_subnet != "" ? row.translated_subnet : null
+          dhcp_settings     = row.dhcp_type != "" ? {
+            dhcp_type = row.dhcp_type
+            ip_range  = row.ip_range
+          } : null
+        }
+      ]
+    }
+  ]
+}
+
+module "socket-site" {
+  providers = {
+    cato = cato
+  }
+  source               = "catonetworks/socket/cato"
+  site_name            = "Cato-X1600-Site"
+  site_description     = "Cato-X1600"
+  native_network_range = "10.11.3.0/24"
+  local_ip             = "10.11.3.5"
+  site_type            = "BRANCH"
+  connection_type      = "SOCKET_X1600"  
+  license_id           = "abcde1234-abcde-1234-abcde1234"
+  license_bw           = 30
+  
+  site_location = {
+    city = "New York City"
+    country_code = "US"
+    state_code = "US-NY"
+    timezone = "America/New_York"
+  }
+  cato_interfaces = [
+    {
+      interface_id         = "INT_4"
+      name                 = "WAN 4"
+      upstream_bandwidth   = 100
+      downstream_bandwidth = 100
+      role                 = "wan_2"
+      precedence           = "ACTIVE"
+    }
+  ]
+  lan_interfaces = local.lan_interfaces
+}
+
+output "Socket_Site_Information" { 
+    value = module.socket-site.site
+}
+
+output "Socket_WAN_Interface_Information" { 
+    value = module.socket-site.wan_interfaces
+}
+
+output "Socket_Network_Range_Information" {
+  value = length(module.socket-site.lan_interfaces) > 0 ? flatten([
+    for iface_key, iface_value in module.socket-site.lan_interfaces : [
+      for subnet, net_info in iface_value.network_ranges : [
+        for net_type in ["with_dhcp", "no_dhcp"] : [
+          for range in net_info[net_type] : {
+            interface_id     = length(iface_value.interface) > 0 ? iface_value.interface[0].interface_id : iface_key
+            interface_name   = length(iface_value.interface) > 0 ? iface_value.interface[0].name : iface_key
+            subnet           = range.subnet
+            local_ip         = range.local_ip
+            gateway          = range.gateway
+            vlan             = range.vlan
+            network_range_id = range.id
+            dhcp_enabled     = net_type == "with_dhcp"
+            dhcp_settings    = range.dhcp_settings
+            range_type       = range.range_type
+          }
+        ]
+      ]
+    ]
+  ]) : []
+}
+```
+
+</details>
 
 ## Site Location Reference
 
@@ -165,12 +293,13 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
+| <a name="requirement_cato"></a> [cato](#requirement\_cato) | 0.0.24 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cato"></a> [cato](#provider\_cato) | n/a |
+| <a name="provider_cato"></a> [cato](#provider\_cato) | 0.0.24 |
 
 ## Modules
 
@@ -182,10 +311,10 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 
 | Name | Type |
 |------|------|
-| [cato_license.license](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/license) | resource |
-| [cato_socket_site.site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/socket_site) | resource |
-| [cato_wan_interface.wan](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/wan_interface) | resource |
-| [cato_accountSnapshotSite.site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
+| [cato_license.license](https://registry.terraform.io/providers/terraform-providers/cato/0.0.24/docs/resources/license) | resource |
+| [cato_socket_site.site](https://registry.terraform.io/providers/terraform-providers/cato/0.0.24/docs/resources/socket_site) | resource |
+| [cato_wan_interface.wan](https://registry.terraform.io/providers/terraform-providers/cato/0.0.24/docs/resources/wan_interface) | resource |
+| [cato_accountSnapshotSite.site](https://registry.terraform.io/providers/terraform-providers/cato/0.0.24/docs/data-sources/accountSnapshotSite) | data source |
 
 ## Inputs
 
