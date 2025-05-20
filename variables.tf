@@ -22,6 +22,7 @@ variable "local_ip" {
 
 variable "site_location" {
   type = object({
+    address      = string
     city         = string
     country_code = string
     state_code   = string
