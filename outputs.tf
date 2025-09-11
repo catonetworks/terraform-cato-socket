@@ -13,7 +13,6 @@ output "site_location" {
   value       = cato_socket_site.site.site_location
 }
 
-
 output "site" {
   value = cato_socket_site.site
 }

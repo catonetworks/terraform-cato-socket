@@ -146,127 +146,10 @@ output "Socket_Network_Range_Information" {
 ```
 </details>
 
+## NOTE  
 
-<details>
-<summary>Module example managing lan interfaces from CSV</summary>
+To manage sites in bulk from either json or csv, pleaes refer to the [Cato Socket Bulk Sites](registry.terraform.io/modules/catonetworks/socket-bulk-sites/cato/latest) module.
 
-The following example shows how to create a physical socket site, and configure WAN or Cato destined interfaces, as well as one or multiple LAN interfaces passing in an array of network_ranges per LAN interface.
-
-Create a csv with the following columns. 
-
-** NOTE ** Eacnh column must contain a Default range_type to configure the native range for that interface.  To add network_ranges to the primary socket LAN interface, specify LAN as the interface ID, do not add a row with Default for LAN as this is managed at the socket_site resource level.
-
-```csv
-interface_id,name,range_type,subnet,local_ip,gateway,vlan,translated_subnet,dhcp_type,ip_range
-LAN,VLAN_TF,VLAN,192.168.168.0/25,192.168.168.6,,,,,
-INT_6,Lan Interface 6,Default,192.168.198.0/25,192.168.198.6,,,,,
-INT_6,VLAN_TF,VLAN,192.168.199.0/25,192.168.199.6,,,,,
-INT_7,Lan Interface 7,Default,192.168.187.0/25,192.168.187.6,,,,DHCP_RANGE,192.168.188.10 - 192.168.188.100
-INT_7,VLAN_TF2,VLAN,192.168.188.0/25,192.168.188.6,,,,DHCP_RANGE,192.168.188.10 - 192.168.188.100
-INT_7,VLAN_TF3,VLAN,192.168.189.0/25,192.168.189.6,,,,,
-INT_7,RoutedFW Name,Routed,172.22.123.0/25,,192.168.187.7,,,,
-```
-
-```hcl
-locals {
-  network_ranges_csv = csvdecode(file("network_ranges.csv"))
-  lan_interfaces = [
-    for int_id in distinct([for row in local.network_ranges_csv : row.interface_id]) : {
-      interface_id = int_id
-      dest_type    = "LAN"
-      name = try([for row in local.network_ranges_csv : row.name if row.interface_id == int_id && row.range_type == "Default"][0], int_id == "LAN" ? null : "")
-      subnet = try([for row in local.network_ranges_csv : row.subnet if row.interface_id == int_id && row.range_type == "Default"][0], int_id == "LAN" ? null : "")
-      local_ip = try([for row in local.network_ranges_csv : row.local_ip if row.interface_id == int_id && row.range_type == "Default"][0], int_id == "LAN" ? null : "")
-      translated_subnet = null
-      network_ranges = [
-        for idx, row in [
-          for r in local.network_ranges_csv : r
-          if r.interface_id == int_id && r.range_type != "Default"
-        ] : {
-          name              = row.name
-          range_type        = row.range_type
-          subnet            = row.subnet
-          local_ip          = row.local_ip != "" ? row.local_ip : null
-          gateway           = row.gateway != "" ? row.gateway : null
-          vlan              = row.range_type == "VLAN" ? 10 + idx + (int_id == "INT_6" ? 0 : 1) : null
-          translated_subnet = row.translated_subnet != "" ? row.translated_subnet : null
-          dhcp_settings     = row.dhcp_type != "" ? {
-            dhcp_type = row.dhcp_type
-            ip_range  = row.ip_range
-          } : null
-        }
-      ]
-    }
-  ]
-}
-
-module "socket-site" {
-  providers = {
-    cato = cato
-  }
-  source               = "catonetworks/socket/cato"
-  site_name            = "Cato-X1600-Site"
-  site_description     = "Cato-X1600"
-  native_network_range = "10.11.3.0/24"
-  local_ip             = "10.11.3.5"
-  site_type            = "BRANCH"
-  connection_type      = "SOCKET_X1600"  
-  license_id           = "abcde1234-abcde-1234-abcde1234"
-  license_bw           = 30
-  
-  site_location = {
-    address        = "555 That Way"
-    city           = "New York City"
-    country_code   = "US"
-    state_code     = "US-NY"
-    timezone       = "America/New_York"
-  }
-  cato_interfaces = [
-    {
-      interface_id         = "INT_4"
-      name                 = "WAN 4"
-      upstream_bandwidth   = 100
-      downstream_bandwidth = 100
-      role                 = "wan_2"
-      precedence           = "ACTIVE"
-    }
-  ]
-  lan_interfaces = local.lan_interfaces
-}
-
-output "Socket_Site_Information" { 
-    value = module.socket-site.site
-}
-
-output "Socket_WAN_Interface_Information" { 
-    value = module.socket-site.wan_interfaces
-}
-
-output "Socket_Network_Range_Information" {
-  value = length(module.socket-site.lan_interfaces) > 0 ? flatten([
-    for iface_key, iface_value in module.socket-site.lan_interfaces : [
-      for subnet, net_info in iface_value.network_ranges : [
-        for net_type in ["with_dhcp", "no_dhcp"] : [
-          for range in net_info[net_type] : {
-            interface_id     = length(iface_value.interface) > 0 ? iface_value.interface[0].interface_id : iface_key
-            interface_name   = length(iface_value.interface) > 0 ? iface_value.interface[0].name : iface_key
-            subnet           = range.subnet
-            local_ip         = range.local_ip
-            gateway          = range.gateway
-            vlan             = range.vlan
-            network_range_id = range.id
-            dhcp_enabled     = net_type == "with_dhcp"
-            dhcp_settings    = range.dhcp_settings
-            range_type       = range.range_type
-          }
-        ]
-      ]
-    ]
-  ]) : []
-}
-```
-
-</details>
 
 ## Site Location Reference
 
@@ -294,13 +177,14 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
+| <a name="requirement_cato"></a> [cato](#requirement\_cato) | >=0.0.43 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cato"></a> [cato](#provider\_cato) | n/a |
+| <a name="provider_cato"></a> [cato](#provider\_cato) | >=0.0.43 |
 
 ## Modules
 
@@ -321,13 +205,18 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_cato_interfaces"></a> [cato\_interfaces](#input\_cato\_interfaces) | n/a | <pre>list(object({<br/>    interface_id         = string<br/>    name                 = string<br/>    upstream_bandwidth   = number<br/>    downstream_bandwidth = number<br/>    role                 = string<br/>    precedence           = string<br/>  }))</pre> | `[]` | no |
+| <a name="input_cato_interfaces"></a> [cato\_interfaces](#input\_cato\_interfaces) | n/a | <pre>list(object({<br/>    interface_index      = string<br/>    name                 = string<br/>    upstream_bandwidth   = number<br/>    downstream_bandwidth = number<br/>    role                 = string<br/>    precedence           = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_connection_type"></a> [connection\_type](#input\_connection\_type) | Connection type can be SOCKET\_AWS1500, SOCKET\_AZ1500, SOCKET\_ESX1500, SOCKET\_X1500, SOCKET\_X1600, SOCKET\_X1600\_LTE, SOCKET\_X1700 | `string` | `null` | no |
-| <a name="input_lan_interfaces"></a> [lan\_interfaces](#input\_lan\_interfaces) | n/a | <pre>list(object({<br/>    interface_id      = string<br/>    name              = string<br/>    dest_type         = string<br/>    local_ip          = string<br/>    subnet            = string<br/>    translated_subnet = string<br/>    network_ranges = list(object({<br/>      name              = string<br/>      range_type        = string<br/>      subnet            = string<br/>      local_ip          = string<br/>      gateway           = string<br/>      vlan              = number<br/>      translated_subnet = string<br/>      dhcp_settings = object({<br/>        dhcp_type = string<br/>        ip_range  = string<br/>      })<br/>    }))<br/>  }))</pre> | `[]` | no |
+| <a name="input_lan_interfaces"></a> [lan\_interfaces](#input\_lan\_interfaces) | n/a | <pre>list(object({<br/>    id                = optional(string)  # Added to support stable indexing<br/>    interface_index   = optional(string)<br/>    name              = optional(string)<br/>    dest_type         = optional(string)<br/>    local_ip          = optional(string)<br/>    subnet            = optional(string)<br/>    translated_subnet = optional(string)<br/>    vrrp_type         = optional(string)<br/>    network_ranges = optional(list(object({<br/>      id                     = optional(string) # Added to support imports<br/>      name                   = optional(string)<br/>      range_type             = optional(string)<br/>      subnet                 = optional(string)<br/>      local_ip               = optional(string)<br/>      gateway                = optional(string)<br/>      vlan                   = optional(string)<br/>      translated_subnet      = optional(string)<br/>      internet_only          = optional(bool)<br/>      import_id              = optional(string) # Added to support imports<br/>      mdns_reflector         = optional(string)<br/>      dhcp_type              = optional(string)<br/>      dhcp_ip_range          = optional(string)<br/>      dhcp_relay_group_id    = optional(string)<br/>      dhcp_relay_group_name  = optional(string)<br/>      dhcp_microsegmentation = optional(string)<br/>    })), [])<br/>  }))</pre> | `[]` | no |
 | <a name="input_license_bw"></a> [license\_bw](#input\_license\_bw) | The license bandwidth number for the cato site, specifying bandwidth ONLY applies for pooled licenses.  For a standard site license that is not pooled, leave this value null. Must be a number greater than 0 and an increment of 10. | `string` | `null` | no |
 | <a name="input_license_id"></a> [license\_id](#input\_license\_id) | The license ID for the Cato vSocket of license type CATO\_SITE, CATO\_SSE\_SITE, CATO\_PB, CATO\_PB\_SSE.  Example License ID value: 'abcde123-abcd-1234-abcd-abcde1234567'.  Note that licenses are for commercial accounts, and not supported for trial accounts. | `string` | `null` | no |
-| <a name="input_local_ip"></a> [local\_ip](#input\_local\_ip) | Native network range | `string` | `null` | no |
+| <a name="input_local_ip"></a> [local\_ip](#input\_local\_ip) | Native network range local IP | `string` | `null` | no |
 | <a name="input_native_network_range"></a> [native\_network\_range](#input\_native\_network\_range) | Native network range | `string` | `null` | no |
+| <a name="input_native_range_dhcp_settings"></a> [native\_range\_dhcp\_settings](#input\_native\_range\_dhcp\_settings) | Native range DHCP settings | <pre>object({<br/>    dhcp_type                  = optional(string)<br/>    ip_range                  = optional(string)<br/>    relay_group_id            = optional(string)<br/>    dhcp_microsegmentation    = optional(bool)<br/>  })</pre> | `null` | no |
+| <a name="input_native_range_gateway"></a> [native\_range\_gateway](#input\_native\_range\_gateway) | Native range gateway | `string` | `null` | no |
+| <a name="input_native_range_mdns_reflector"></a> [native\_range\_mdns\_reflector](#input\_native\_range\_mdns\_reflector) | Native range mDNS reflector | `bool` | `false` | no |
+| <a name="input_native_range_translated_subnet"></a> [native\_range\_translated\_subnet](#input\_native\_range\_translated\_subnet) | Native range translated subnet | `string` | `null` | no |
+| <a name="input_native_range_vlan"></a> [native\_range\_vlan](#input\_native\_range\_vlan) | Native range VLAN | `number` | `null` | no |
 | <a name="input_site_description"></a> [site\_description](#input\_site\_description) | n/a | `string` | `null` | no |
 | <a name="input_site_location"></a> [site\_location](#input\_site\_location) | n/a | <pre>object({<br/>    address      = string<br/>    city         = string<br/>    country_code = string<br/>    state_code   = string<br/>    timezone     = string<br/>  })</pre> | n/a | yes |
 | <a name="input_site_name"></a> [site\_name](#input\_site\_name) | n/a | `string` | `null` | no |

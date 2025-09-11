@@ -1,8 +1,21 @@
+
+locals {
+  # Map LAN interface index based on connection type
+  cur_interface_index = (
+    var.interface_index == "LAN" ? (
+      var.connection_type == "SOCKET_X1600" ? "INT_5" :
+      var.connection_type == "SOCKET_X1600_LTE" ? "INT_5" :
+      var.connection_type == "SOCKET_X1700" ? "INT_3" :
+      "LAN1"
+    ) : var.interface_index
+  )
+}
+
 resource "cato_lan_interface" "interface" {
-  count             = var.interface_id == "LAN" || var.interface_id == "LAN1" ? 0 : 1
+  for_each          = var.interface_index == "LAN" ? {} : { (local.cur_interface_index) = true }
   site_id           = var.site_id
-  interface_id      = var.interface_id
-  name              = var.name == null ? var.interface_id : var.name
+  interface_id      = local.cur_interface_index
+  name              = var.name == null ? var.interface_index : var.name
   dest_type         = var.dest_type
   local_ip          = var.local_ip
   subnet            = var.subnet
@@ -10,27 +23,16 @@ resource "cato_lan_interface" "interface" {
   vrrp_type         = var.vrrp_type
 }
 
-data "cato_networkInterfaces" "interface" {
-  count                   = var.interface_id == "LAN" || var.interface_id == "LAN1" ? 1 : 0
-  site_id                 = var.site_id
-  network_interface_index = var.interface_id
-}
-
-locals {
-  interface_id = var.interface_id == "LAN" || var.interface_id == "LAN1" ? data.cato_networkInterfaces.interface[0].items[0].id : cato_lan_interface.interface[0].id
-}
-
-module "network_range" {
-  depends_on    = [cato_lan_interface.interface]
-  source        = "../network_range"
-  for_each      = { for network_range in var.network_ranges : network_range.subnet => network_range }
-  site_id       = var.site_id
-  interface_id  = local.interface_id
-  name          = each.value.name
-  range_type    = each.value.range_type
-  subnet        = each.value.subnet
-  local_ip      = each.value.local_ip
-  gateway       = each.value.gateway
-  vlan          = each.value.vlan
-  dhcp_settings = each.value.dhcp_settings
+module "network_ranges" {
+  depends_on = [ cato_lan_interface.interface ]
+  source = "../../../terraform-cato-network-ranges-bulk"
+  # source = "catonetworks/network-ranges-bulk/cato"
+  network_range_data = [
+    for range in var.network_ranges : merge(range, {
+      site_id         = var.site_id
+      interface_index = local.cur_interface_index
+      # Pass the actual interface_id from the created LAN interface
+      interface_id    = var.interface_index == "LAN" ? null : values(cato_lan_interface.interface)[0].id
+    })
+  ]
 }

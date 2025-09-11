@@ -15,9 +15,44 @@ variable "native_network_range" {
 }
 
 variable "local_ip" {
-  description = "Native network range"
+  description = "Native network range local IP"
   type        = string
   default     = null
+}
+
+variable "native_range_gateway" {
+  description = "Native range gateway"
+  type        = string
+  default     = null
+}
+
+variable "native_range_vlan" {
+  description = "Native range VLAN"
+  type        = number
+  default     = null
+}
+
+variable "native_range_mdns_reflector" {
+  description = "Native range mDNS reflector"
+  type        = bool
+  default     = false
+}
+
+variable "native_range_translated_subnet" {
+  description = "Native range translated subnet"
+  type        = string
+  default     = null
+}
+
+variable "native_range_dhcp_settings" {
+  description = "Native range DHCP settings"
+  type = object({
+    dhcp_type                  = optional(string)
+    ip_range                  = optional(string)
+    relay_group_id            = optional(string)
+    dhcp_microsegmentation    = optional(bool)
+  })
+  default = null
 }
 
 variable "site_location" {
@@ -44,7 +79,7 @@ variable "connection_type" {
 
 variable "cato_interfaces" {
   type = list(object({
-    interface_id         = string
+    interface_index      = string
     name                 = string
     upstream_bandwidth   = number
     downstream_bandwidth = number
@@ -56,25 +91,32 @@ variable "cato_interfaces" {
 
 variable "lan_interfaces" {
   type = list(object({
-    interface_id      = string
-    name              = string
-    dest_type         = string
-    local_ip          = string
-    subnet            = string
-    translated_subnet = string
-    network_ranges = list(object({
-      name              = string
-      range_type        = string
-      subnet            = string
-      local_ip          = string
-      gateway           = string
-      vlan              = number
-      translated_subnet = string
-      dhcp_settings = object({
-        dhcp_type = string
-        ip_range  = string
-      })
-    }))
+    id                = optional(string)  # Added to support stable indexing
+    interface_index   = optional(string)
+    name              = optional(string)
+    dest_type         = optional(string)
+    local_ip          = optional(string)
+    subnet            = optional(string)
+    translated_subnet = optional(string)
+    vrrp_type         = optional(string)
+    network_ranges = optional(list(object({
+      id                     = optional(string) # Added to support imports
+      name                   = optional(string)
+      range_type             = optional(string)
+      subnet                 = optional(string)
+      local_ip               = optional(string)
+      gateway                = optional(string)
+      vlan                   = optional(string)
+      translated_subnet      = optional(string)
+      internet_only          = optional(bool)
+      import_id              = optional(string) # Added to support imports
+      mdns_reflector         = optional(string)
+      dhcp_type              = optional(string)
+      dhcp_ip_range          = optional(string)
+      dhcp_relay_group_id    = optional(string)
+      dhcp_relay_group_name  = optional(string)
+      dhcp_microsegmentation = optional(string)
+    })), [])
   }))
   default = []
 }
