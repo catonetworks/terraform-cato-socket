@@ -15,9 +15,10 @@
 ### Features
 - Update module to support modifying networks for default LAN native range interfaces
 
-## 0.0.4 (2025-09-11)
+## 0.0.5 (2025-09-12)
 
 ### Features
 - Removed network ranges from local module and use the public https://registry.terraform.io/modules/catonetworks/network-ranges-bulk/cato/latest as a nested module
 - Fixed logic in interface mapping to support all attributes and map native_interface and native_range properly
 - Updated outputs
+- Updated internal module path to use public modules
