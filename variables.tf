@@ -60,7 +60,7 @@ variable "site_location" {
     address      = string
     city         = string
     country_code = string
-    state_code   = string
+    state_code   = optional(string)
     timezone     = string
   })
 }
@@ -94,7 +94,7 @@ variable "lan_interfaces" {
     id                = optional(string)  # Added to support stable indexing
     interface_index   = optional(string)
     name              = optional(string)
-    dest_type         = optional(string)
+    dest_type         = optional(string) # If dest_type is specified, module will attempt to create the lan_interface, otherwise the module will only create the network_ranges.
     local_ip          = optional(string)
     subnet            = optional(string)
     translated_subnet = optional(string)
@@ -131,4 +131,27 @@ variable "license_bw" {
   description = "The license bandwidth number for the cato site, specifying bandwidth ONLY applies for pooled licenses.  For a standard site license that is not pooled, leave this value null. Must be a number greater than 0 and an increment of 10."
   type        = string
   default     = null
+}
+
+variable "default_interface_network_ranges" {
+  description = "Network ranges for the default/native LAN interface (when no separate LAN interface resource is created)"
+  type = list(object({
+    id                     = optional(string) # Network range ID for imports
+    name                   = string           # Network range name
+    range_type             = optional(string) # VLAN, Direct, etc.
+    subnet                 = string           # Subnet CIDR
+    local_ip               = optional(string)
+    gateway                = optional(string)
+    vlan                   = optional(number)
+    translated_subnet      = optional(string)
+    internet_only          = optional(bool)
+    mdns_reflector         = optional(bool)
+    dhcp_settings = optional(object({
+      dhcp_type                  = optional(string)
+      ip_range                  = optional(string)
+      relay_group_id            = optional(string)
+      dhcp_microsegmentation    = optional(bool)
+    }))
+  }))
+  default = []
 }

@@ -35,7 +35,7 @@ resource "cato_wan_interface" "wan" {
 
 module "lan_interfaces" {
   source            = "./modules/lan_interface"
-  for_each          = { for interface in var.lan_interfaces : interface.interface_index => interface if interface.interface_index != null }
+  for_each          = { for interface in var.lan_interfaces : interface.interface_index => interface if interface.interface_index != null && interface.dest_type != null }
   site_id           = cato_socket_site.site.id
   connection_type   = var.connection_type
   interface_id      = each.value.interface_index
@@ -47,6 +47,35 @@ module "lan_interfaces" {
   network_ranges    = each.value.network_ranges != null ? each.value.network_ranges : []
   dest_type         = each.value.dest_type
   vrrp_type         = try(each.value.vrrp_type, null)
+}
+
+# Network ranges for the default/native LAN interface
+# These are created directly without a separate LAN interface resource
+resource "cato_network_range" "default_interface_ranges" {
+  for_each = {
+    for idx, range in var.default_interface_network_ranges : 
+    "${try(range.interface_index, "DEFAULT")}-${replace(range.name, " ", "_")}" => range
+  }
+  
+  site_id           = cato_socket_site.site.id
+  interface_id      = cato_socket_site.site.native_range.interface_id
+  name              = each.value.name
+  range_type        = each.value.range_type
+  subnet            = each.value.subnet
+  local_ip          = each.value.local_ip
+  gateway           = each.value.gateway
+  vlan              = each.value.vlan
+  translated_subnet = each.value.translated_subnet
+  internet_only     = try(each.value.internet_only, false)
+  mdns_reflector    = try(each.value.mdns_reflector, false)
+  
+  # DHCP settings
+  dhcp_settings = each.value.dhcp_settings != null ? {
+    dhcp_type                  = each.value.dhcp_settings.dhcp_type
+    ip_range                  = each.value.dhcp_settings.ip_range
+    relay_group_id            = each.value.dhcp_settings.relay_group_id
+    dhcp_microsegmentation    = each.value.dhcp_settings.dhcp_microsegmentation
+  } : null
 }
 
 resource "cato_license" "license" {

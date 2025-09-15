@@ -28,6 +28,11 @@ output "lan_interfaces" {
   } }
 }
 
+output "default_interface_network_ranges" {
+  description = "Network ranges created for the default/native LAN interface"
+  value = { for k, v in cato_network_range.default_interface_ranges : k => v }
+}
+
 output "cato_license_site" {
   value = var.license_id == null ? null : {
     id           = cato_license.license[0].id

@@ -36,7 +36,7 @@ variable "name" {
 }
 
 variable "dest_type" {
-  description = "SocketInterface destination type (https://api.catonetworks.com/documentation/#definition-SocketInterfaceDestType)"
+  description = "If dest_type is specified, module will attempt to create the lan_interface, otherwise the module will only create the network_ranges. the SocketInterface destination type (https://api.catonetworks.com/documentation/#definition-SocketInterfaceDestType)"
   type        = string
   default     = null
 }
