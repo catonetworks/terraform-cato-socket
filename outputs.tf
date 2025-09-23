@@ -22,10 +22,16 @@ output "wan_interfaces" {
 }
 
 output "lan_interfaces" {
-  value = { for k, v in module.lan_interfaces : k => {
-    interface      = v.lan_interface
-    network_ranges = v.network_ranges
-  } }
+  value = merge(
+    { for k, v in module.lan_interfaces : k => {
+      interface      = v.lan_interface
+      network_ranges = v.network_ranges
+    } },
+    { for k, v in cato_lan_interface_lag_member.lag_lan_members : k => {
+      interface      = v
+      network_ranges = []  # LAG member interfaces don't have network ranges directly
+    } }
+  )
 }
 
 output "default_interface_network_ranges" {

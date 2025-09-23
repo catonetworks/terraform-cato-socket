@@ -50,9 +50,28 @@ variable "native_range_dhcp_settings" {
     dhcp_type                  = optional(string)
     ip_range                  = optional(string)
     relay_group_id            = optional(string)
+    relay_group_name          = optional(string)
     dhcp_microsegmentation    = optional(bool)
   })
   default = null
+}
+
+variable "interface_dest_type" {
+  description = "Native range interface destination type"
+  type        = string
+  default     = null
+}
+
+variable "lag_min_links" {
+  description = "Native range interface LAG minimum links"
+  type        = number
+  default     = null
+}
+
+variable "interface_name" {
+  description = "Native range interface name"
+  type        = string
+  default     = null
 }
 
 variable "site_location" {
@@ -150,6 +169,7 @@ variable "default_interface_network_ranges" {
       dhcp_type                  = optional(string)
       ip_range                  = optional(string)
       relay_group_id            = optional(string)
+      relay_group_name          = optional(string)
       dhcp_microsegmentation    = optional(bool)
     }))
   }))
