@@ -40,7 +40,7 @@ resource "cato_wan_interface" "wan" {
 # Regular LAN interfaces (excluding LAG_LAN_MEMBER interfaces)
 module "lan_interfaces" {
   source            = "./modules/lan_interface"
-  for_each          = { for interface in var.lan_interfaces : interface.interface_index => interface if interface.interface_index != null && interface.dest_type != null && interface.dest_type != "LAG_LAN_MEMBER" }
+  for_each          = { for interface in var.lan_interfaces : interface.interface_index => interface if interface.interface_index != null && interface.dest_type != null && interface.dest_type != "LAN_LAG_MEMBER" }
   depends_on        = [cato_socket_site.site]
   site_id           = cato_socket_site.site.id
   connection_type   = var.connection_type
@@ -58,7 +58,7 @@ module "lan_interfaces" {
 # LAG_LAN_MEMBER interfaces (dependent on regular LAN interfaces being created first)
 resource "cato_lan_interface_lag_member" "lag_lan_members" {
   depends_on        = [module.lan_interfaces]
-  for_each          = { for interface in var.lan_interfaces : interface.interface_index => interface if interface.interface_index != null && interface.dest_type == "LAG_LAN_MEMBER" }
+  for_each          = { for interface in var.lan_interfaces : interface.interface_index => interface if interface.interface_index != null && interface.dest_type == "LAN_LAG_MEMBER" }
   dest_type         = each.value.dest_type
   interface_id      = each.value.interface_index
   name              = each.value.name
