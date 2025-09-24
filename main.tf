@@ -105,15 +105,3 @@ resource "cato_license" "license" {
   license_id = var.license_id
   bw         = var.license_bw == null ? null : var.license_bw
 }
-
-# Debug output
-output "debug_default_interface_data" {
-  value = {
-    for idx, range in var.default_interface_network_ranges : 
-    "${try(range.interface_index, "DEFAULT")}-${replace(range.name, " ", "_")}-${idx}" => {
-      name = range.name
-      dhcp_settings = range.dhcp_settings
-    }
-    if range.name == "Example VLAN 207"
-  }
-}
