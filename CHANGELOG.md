@@ -33,3 +33,7 @@
 - Updated dest_type variable description to clarify LAN interface creation behavior
 - Made state_code optional in site_location variable
 - Updated README documentation with new variable and output information
+
+## 0.0.7 (2025-09-24)
+
+- Updated to support export/import to include logic for DHCP_RELAY and DHCP settings
