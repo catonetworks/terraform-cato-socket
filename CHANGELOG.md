@@ -37,3 +37,7 @@
 ## 0.0.7 (2025-09-24)
 
 - Updated to support export/import to include logic for DHCP_RELAY and DHCP settings
+
+## 0.0.8 (2025-09-26)
+
+- Updated module path to reference published module. 
