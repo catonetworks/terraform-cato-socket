@@ -41,3 +41,7 @@
 ## 0.0.8 (2025-09-26)
 
 - Updated module path to reference published module. 
+
+## 0.0.9 (2025-10-20)
+
+- Added input validation for local_ip

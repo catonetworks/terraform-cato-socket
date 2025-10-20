@@ -18,6 +18,13 @@ variable "local_ip" {
   description = "Native network range local IP"
   type        = string
   default     = null
+  validation {
+    condition = can(regex(
+      "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+      var.local_ip
+    ))
+    error_message = "The local_ip must be a valid IPv4 address (e.g., 192.168.1.1)."
+  }
 }
 
 variable "native_range_gateway" {
