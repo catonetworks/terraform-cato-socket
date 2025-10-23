@@ -45,3 +45,7 @@
 ## 0.0.9 (2025-10-20)
 
 - Added input validation for local_ip
+
+## 0.0.10 (2025-10-23)
+
+- Incrementing TF version to 1.13 and provider to 0.0.47 to address comples csv parsing string mapping required in newer versions
