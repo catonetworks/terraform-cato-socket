@@ -19,18 +19,12 @@ variable "local_ip" {
   type        = string
   default     = null
   validation {
-    condition = can(regex(
+    condition = var.local_ip == null || var.local_ip == "" || can(regex(
       "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
       var.local_ip
     ))
     error_message = "The local_ip must be a valid IPv4 address (e.g., 192.168.1.1)."
   }
-}
-
-variable "native_range_gateway" {
-  description = "Native range gateway"
-  type        = string
-  default     = null
 }
 
 variable "native_range_vlan" {
@@ -172,6 +166,7 @@ variable "default_interface_network_ranges" {
     translated_subnet      = optional(string)
     internet_only          = optional(bool)
     mdns_reflector         = optional(bool)
+    interface_index        = optional(string) # Interface index for the network range
     dhcp_settings = optional(object({
       dhcp_type                  = optional(string)
       ip_range                  = optional(string)

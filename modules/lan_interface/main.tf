@@ -20,7 +20,8 @@ resource "cato_lan_interface" "interface" {
 
 module "network_ranges" {
   depends_on = [cato_lan_interface.interface]
-  source = "catonetworks/network-ranges-bulk/cato"
+  # source = "catonetworks/network-ranges-bulk/cato"
+  source = "../../../terraform-cato-network-ranges-bulk"
   
   network_range_data = [
     for range in var.network_ranges : merge(range, {

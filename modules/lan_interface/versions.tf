@@ -2,8 +2,8 @@ terraform {
   required_providers {
     cato = {
       source = "catonetworks/cato"
-      version = ">= 0.0.47"
+      version = "0.0.58"
     }
   }
-  required_version = ">= 1.5"
+  required_version = ">= 0.13"
 }
