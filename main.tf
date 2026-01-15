@@ -142,8 +142,8 @@ resource "cato_network_range" "default_interface_ranges" {
 
 resource "cato_license" "license" {
   depends_on = [cato_socket_site.site]
-  count      = var.license_id == null ? 0 : 1
+  count      = var.license_id == null || var.license_id == "" ? 0 : 1
   site_id    = cato_socket_site.site.id
   license_id = var.license_id
-  bw         = var.license_bw == null ? null : var.license_bw
+  bw         = var.license_bw == null || var.license_bw == "" ? null : try(tonumber(var.license_bw), null)
 }
