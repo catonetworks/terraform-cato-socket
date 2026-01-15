@@ -49,3 +49,8 @@
 ## 0.0.10 (2025-10-23)
 
 - Incrementing TF version to 1.13 and provider to 0.0.47 to address comples csv parsing string mapping required in newer versions
+
+## 0.0.11 (2026-01-15)
+
+- Updated license var settings to account for empty string, and updated license_bw to account for empty string
+- Updated module to support managing resources by id instead of indexed by name or string value
