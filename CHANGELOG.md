@@ -54,3 +54,6 @@
 
 - Updated license var settings to account for empty string, and updated license_bw to account for empty string
 - Updated module to support managing resources by id instead of indexed by name or string value
+
+## 0.0.12 (2026-01-16)
+- Reverted indexing back to using names to accommodate new creation of records and impoorts of existing sites into terraform
