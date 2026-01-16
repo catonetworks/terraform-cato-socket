@@ -77,9 +77,9 @@ resource "cato_wan_interface" "wan" {
 # Regular LAN interfaces (excluding LAG_LAN_MEMBER interfaces)
 module "lan_interfaces" {
   source            = "./modules/lan_interface"
-  # Use interface ID if available (for imports), otherwise use interface_index
+  # Index by interface_index for readability in state
   for_each          = { for interface in var.lan_interfaces :
-    (interface.id != null && interface.id != "" ? interface.id : interface.interface_index) => interface
+    interface.interface_index => interface
     if interface.interface_index != null && interface.dest_type != null && interface.dest_type != "LAN_LAG_MEMBER" }
   depends_on        = [cato_socket_site.site]
   site_id           = cato_socket_site.site.id
@@ -98,9 +98,9 @@ module "lan_interfaces" {
 # LAG_LAN_MEMBER interfaces (dependent on regular LAN interfaces being created first)
 resource "cato_lan_interface_lag_member" "lag_lan_members" {
   depends_on        = [module.lan_interfaces]
-  # Use interface ID if available (for imports), otherwise use interface_index
+  # Index by interface_index for readability in state
   for_each          = { for interface in var.lan_interfaces :
-    (interface.id != null && interface.id != "" ? interface.id : interface.interface_index) => interface
+    interface.interface_index => interface
     if interface.interface_index != null && interface.dest_type == "LAN_LAG_MEMBER" }
   dest_type         = each.value.dest_type
   interface_id      = each.value.interface_index
@@ -112,9 +112,9 @@ resource "cato_lan_interface_lag_member" "lag_lan_members" {
 # These are created directly without a separate LAN interface resource
 resource "cato_network_range" "default_interface_ranges" {
   for_each = {
-    for range in var.default_interface_network_ranges :
-    # Use ID if available (for imports), otherwise use a combination that's less likely to collide
-    try(range.id, null) != null && try(range.id, null) != "" ? range.id : "${try(range.interface_index, "DEFAULT")}-${replace(range.name, " ", "_")}-${replace(range.subnet, "/", "_")}" => range
+    for idx, range in var.default_interface_network_ranges :
+    # Index by network range name with index for uniqueness
+    "${range.name}_${idx}" => range
   }
   depends_on        = [module.lan_interfaces]
   site_id           = cato_socket_site.site.id
