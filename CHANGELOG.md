@@ -57,3 +57,6 @@
 
 ## 0.0.12 (2026-01-16)
 - Reverted indexing back to using names to accommodate new creation of records and impoorts of existing sites into terraform
+
+## 0.0.13 (2026-02-23)
+- Updated module to support provider version newer than 0.0.58 and added interface_index for default interface for lan for socket

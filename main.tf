@@ -14,6 +14,7 @@ resource "cato_socket_site" "site" {
     interface_dest_type  = var.interface_dest_type
     lag_min_links        = var.lag_min_links
     interface_name       = var.interface_name
+    interface_index      = var.interface_index
     dhcp_settings        = var.native_range_dhcp_settings
   }
 

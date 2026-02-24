@@ -75,6 +75,12 @@ variable "interface_name" {
   default     = null
 }
 
+variable "interface_index" {
+  description = "Native range interface index (e.g., INT_4 for X1700, LAN1 for X1500). If not specified, uses the default for the connection type."
+  type        = string
+  default     = null
+}
+
 variable "site_location" {
   type = object({
     address      = string
