@@ -60,3 +60,6 @@
 
 ## 0.0.13 (2026-02-23)
 - Updated module to support provider version newer than 0.0.58 and added interface_index for default interface for lan for socket
+
+## 0.0.14 (2026-04-14)
+- Separate the wan_lte from wan interfaces in order of operations

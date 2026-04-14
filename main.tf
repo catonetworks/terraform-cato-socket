@@ -59,12 +59,33 @@ locals {
   }
 }
 
+# LTE WAN interfaces - must be configured FIRST to free up default roles
+# LTE interfaces may start with a default role (e.g., wan_2) that conflicts
+# with other interfaces. Configuring LTE first reassigns it to wan_3.
+resource "cato_wan_interface" "wan_lte" {
+  for_each = {
+    for k, v in local.wan_interfaces_with_order : k => v
+    if k == "LTE"
+  }
+  depends_on           = [cato_socket_site.site]
+  site_id              = cato_socket_site.site.id
+  interface_id         = each.value.interface_index
+  name                 = each.value.name
+  upstream_bandwidth   = each.value.upstream_bandwidth
+  downstream_bandwidth = each.value.downstream_bandwidth
+  role                 = each.value.role
+  precedence           = each.value.precedence
+}
+
+# Non-LTE WAN interfaces - configured AFTER LTE interfaces
 resource "cato_wan_interface" "wan" {
-  for_each             = local.wan_interfaces_with_order
+  for_each = {
+    for k, v in local.wan_interfaces_with_order : k => v
+    if k != "LTE"
+  }
   depends_on           = [
     cato_socket_site.site,
-    # Add dependency on previous WAN interface if not the first one
-    # This ensures sequential processing in descending role order
+    cato_wan_interface.wan_lte,  # Wait for LTE to be configured first
   ]
   site_id              = cato_socket_site.site.id
   interface_id         = each.value.interface_index

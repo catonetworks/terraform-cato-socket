@@ -15,6 +15,16 @@ Terraform module which creates a Socket Site in the Cato Management Application 
 The following example shows how to create a physical socket site, and configure WAN or Cato destined interfaces, as well as one or multiple LAN interfaces passing in an array of network_ranges per LAN interface.
 
 ```hcl
+terraform {
+  required_providers {
+    cato = {
+      source = "catonetworks/cato"
+      version = ">= 0.0.70"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
 provider "cato" {
   baseurl    = var.baseurl
   token      = var.token
@@ -177,14 +187,14 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5 |
-| <a name="requirement_cato"></a> [cato](#requirement\_cato) | >= 0.0.46 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
+| <a name="requirement_cato"></a> [cato](#requirement\_cato) | >= 0.0.70 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_cato"></a> [cato](#provider\_cato) | >= 0.0.46 |
+| <a name="provider_cato"></a> [cato](#provider\_cato) | >= 0.0.70 |
 
 ## Modules
 
@@ -201,6 +211,7 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 | [cato_network_range.default_interface_ranges](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/network_range) | resource |
 | [cato_socket_site.site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/socket_site) | resource |
 | [cato_wan_interface.wan](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/wan_interface) | resource |
+| [cato_wan_interface.wan_lte](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/wan_interface) | resource |
 | [cato_accountSnapshotSite.site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
 
 ## Inputs
@@ -209,8 +220,9 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 |------|-------------|------|---------|:--------:|
 | <a name="input_cato_interfaces"></a> [cato\_interfaces](#input\_cato\_interfaces) | n/a | <pre>list(object({<br/>    interface_index      = string<br/>    name                 = string<br/>    upstream_bandwidth   = number<br/>    downstream_bandwidth = number<br/>    role                 = string<br/>    precedence           = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_connection_type"></a> [connection\_type](#input\_connection\_type) | Connection type can be SOCKET\_AWS1500, SOCKET\_AZ1500, SOCKET\_ESX1500, SOCKET\_X1500, SOCKET\_X1600, SOCKET\_X1600\_LTE, SOCKET\_X1700 | `string` | `null` | no |
-| <a name="input_default_interface_network_ranges"></a> [default\_interface\_network\_ranges](#input\_default\_interface\_network\_ranges) | Network ranges for the default/native LAN interface (when no separate LAN interface resource is created) | <pre>list(object({<br/>    id                     = optional(string) # Network range ID for imports<br/>    name                   = string           # Network range name<br/>    range_type             = optional(string) # VLAN, Direct, etc.<br/>    subnet                 = string           # Subnet CIDR<br/>    local_ip               = optional(string)<br/>    gateway                = optional(string)<br/>    vlan                   = optional(number)<br/>    translated_subnet      = optional(string)<br/>    internet_only          = optional(bool)<br/>    mdns_reflector         = optional(bool)<br/>    dhcp_settings = optional(object({<br/>      dhcp_type                  = optional(string)<br/>      ip_range                  = optional(string)<br/>      relay_group_id            = optional(string)<br/>      relay_group_name          = optional(string)<br/>      dhcp_microsegmentation    = optional(bool)<br/>    }))<br/>  }))</pre> | `[]` | no |
+| <a name="input_default_interface_network_ranges"></a> [default\_interface\_network\_ranges](#input\_default\_interface\_network\_ranges) | Network ranges for the default/native LAN interface (when no separate LAN interface resource is created) | <pre>list(object({<br/>    id                     = optional(string) # Network range ID for imports<br/>    name                   = string           # Network range name<br/>    range_type             = optional(string) # VLAN, Direct, etc.<br/>    subnet                 = string           # Subnet CIDR<br/>    local_ip               = optional(string)<br/>    gateway                = optional(string)<br/>    vlan                   = optional(number)<br/>    translated_subnet      = optional(string)<br/>    internet_only          = optional(bool)<br/>    mdns_reflector         = optional(bool)<br/>    interface_index        = optional(string) # Interface index for the network range<br/>    dhcp_settings = optional(object({<br/>      dhcp_type                  = optional(string)<br/>      ip_range                  = optional(string)<br/>      relay_group_id            = optional(string)<br/>      relay_group_name          = optional(string)<br/>      dhcp_microsegmentation    = optional(bool)<br/>    }))<br/>  }))</pre> | `[]` | no |
 | <a name="input_interface_dest_type"></a> [interface\_dest\_type](#input\_interface\_dest\_type) | Native range interface destination type | `string` | `null` | no |
+| <a name="input_interface_index"></a> [interface\_index](#input\_interface\_index) | Native range interface index (e.g., INT\_4 for X1700, LAN1 for X1500). If not specified, uses the default for the connection type. | `string` | `null` | no |
 | <a name="input_interface_name"></a> [interface\_name](#input\_interface\_name) | Native range interface name | `string` | `null` | no |
 | <a name="input_lag_min_links"></a> [lag\_min\_links](#input\_lag\_min\_links) | Native range interface LAG minimum links | `number` | `null` | no |
 | <a name="input_lan_interfaces"></a> [lan\_interfaces](#input\_lan\_interfaces) | n/a | <pre>list(object({<br/>    id                = optional(string)  # Added to support stable indexing<br/>    interface_index   = optional(string)<br/>    name              = optional(string)<br/>    dest_type         = optional(string) # If dest_type is specified, module will attempt to create the lan_interface, otherwise the module will only create the network_ranges.<br/>    local_ip          = optional(string)<br/>    subnet            = optional(string)<br/>    translated_subnet = optional(string)<br/>    vrrp_type         = optional(string)<br/>    network_ranges = optional(list(object({<br/>      id                     = optional(string) # Added to support imports<br/>      name                   = optional(string)<br/>      range_type             = optional(string)<br/>      subnet                 = optional(string)<br/>      local_ip               = optional(string)<br/>      gateway                = optional(string)<br/>      vlan                   = optional(string)<br/>      translated_subnet      = optional(string)<br/>      internet_only          = optional(bool)<br/>      import_id              = optional(string) # Added to support imports<br/>      mdns_reflector         = optional(string)<br/>      dhcp_type              = optional(string)<br/>      dhcp_ip_range          = optional(string)<br/>      dhcp_relay_group_id    = optional(string)<br/>      dhcp_relay_group_name  = optional(string)<br/>      dhcp_microsegmentation = optional(string)<br/>    })), [])<br/>  }))</pre> | `[]` | no |
@@ -219,7 +231,6 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 | <a name="input_local_ip"></a> [local\_ip](#input\_local\_ip) | Native network range local IP | `string` | `null` | no |
 | <a name="input_native_network_range"></a> [native\_network\_range](#input\_native\_network\_range) | Native network range | `string` | `null` | no |
 | <a name="input_native_range_dhcp_settings"></a> [native\_range\_dhcp\_settings](#input\_native\_range\_dhcp\_settings) | Native range DHCP settings | <pre>object({<br/>    dhcp_type                  = optional(string)<br/>    ip_range                  = optional(string)<br/>    relay_group_id            = optional(string)<br/>    relay_group_name          = optional(string)<br/>    dhcp_microsegmentation    = optional(bool)<br/>  })</pre> | `null` | no |
-| <a name="input_native_range_gateway"></a> [native\_range\_gateway](#input\_native\_range\_gateway) | Native range gateway | `string` | `null` | no |
 | <a name="input_native_range_mdns_reflector"></a> [native\_range\_mdns\_reflector](#input\_native\_range\_mdns\_reflector) | Native range mDNS reflector | `bool` | `false` | no |
 | <a name="input_native_range_translated_subnet"></a> [native\_range\_translated\_subnet](#input\_native\_range\_translated\_subnet) | Native range translated subnet | `string` | `null` | no |
 | <a name="input_native_range_vlan"></a> [native\_range\_vlan](#input\_native\_range\_vlan) | Native range VLAN | `number` | `null` | no |
