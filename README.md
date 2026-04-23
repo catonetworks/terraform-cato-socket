@@ -22,7 +22,7 @@ terraform {
       version = ">= 0.0.70"
     }
   }
-  required_version = ">= 0.13"
+  required_version = ">= 1.5"
 }
 
 provider "cato" {
@@ -167,8 +167,8 @@ For more information on site_location syntax, use the [Cato CLI](https://github.
 
 ```bash
 $ pip3 install catocli
-$ export CATO_TOKEN="your-api-token-here"
-$ export CATO_ACCOUNT_ID="your-account-id"
+$ export TF_VAR_CATO_TOKEN="your-api-token-here"
+$ export TF_VAR_CATO_ACCOUNT_ID="your-account-id"
 $ catocli query siteLocation -h
 $ catocli query siteLocation '{"filters":[{"search": "San Diego","field":"city","operation":"exact"}]}' -p
 ```
@@ -186,26 +186,26 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 ## Requirements
 
 | Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5 |
 | <a name="requirement_cato"></a> [cato](#requirement\_cato) | >= 0.0.70 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_cato"></a> [cato](#provider\_cato) | >= 0.0.70 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_lan_interfaces"></a> [lan\_interfaces](#module\_lan\_interfaces) | ./modules/lan_interface | n/a |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [cato_lan_interface_lag_member.lag_lan_members](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/lan_interface_lag_member) | resource |
 | [cato_license.license](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/license) | resource |
 | [cato_network_range.default_interface_ranges](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/network_range) | resource |
@@ -217,7 +217,7 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_cato_interfaces"></a> [cato\_interfaces](#input\_cato\_interfaces) | n/a | <pre>list(object({<br/>    interface_index      = string<br/>    name                 = string<br/>    upstream_bandwidth   = number<br/>    downstream_bandwidth = number<br/>    role                 = string<br/>    precedence           = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_connection_type"></a> [connection\_type](#input\_connection\_type) | Connection type can be SOCKET\_AWS1500, SOCKET\_AZ1500, SOCKET\_ESX1500, SOCKET\_X1500, SOCKET\_X1600, SOCKET\_X1600\_LTE, SOCKET\_X1700 | `string` | `null` | no |
 | <a name="input_default_interface_network_ranges"></a> [default\_interface\_network\_ranges](#input\_default\_interface\_network\_ranges) | Network ranges for the default/native LAN interface (when no separate LAN interface resource is created) | <pre>list(object({<br/>    id                     = optional(string) # Network range ID for imports<br/>    name                   = string           # Network range name<br/>    range_type             = optional(string) # VLAN, Direct, etc.<br/>    subnet                 = string           # Subnet CIDR<br/>    local_ip               = optional(string)<br/>    gateway                = optional(string)<br/>    vlan                   = optional(number)<br/>    translated_subnet      = optional(string)<br/>    internet_only          = optional(bool)<br/>    mdns_reflector         = optional(bool)<br/>    interface_index        = optional(string) # Interface index for the network range<br/>    dhcp_settings = optional(object({<br/>      dhcp_type                  = optional(string)<br/>      ip_range                  = optional(string)<br/>      relay_group_id            = optional(string)<br/>      relay_group_name          = optional(string)<br/>      dhcp_microsegmentation    = optional(bool)<br/>    }))<br/>  }))</pre> | `[]` | no |
@@ -242,7 +242,7 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_cato_license_site"></a> [cato\_license\_site](#output\_cato\_license\_site) | n/a |
 | <a name="output_default_interface_network_ranges"></a> [default\_interface\_network\_ranges](#output\_default\_interface\_network\_ranges) | Network ranges created for the default/native LAN interface |
 | <a name="output_lan_interfaces"></a> [lan\_interfaces](#output\_lan\_interfaces) | n/a |
